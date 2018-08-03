@@ -223,6 +223,8 @@ class ELFFile(object):
             return 'AArch64'
         elif self['e_machine'] == 'EM_MIPS':
             return 'MIPS'
+        elif self['e_machine'] == 'EM_PPC':
+            return 'PPC'
         else:
             return '<unknown>'
 

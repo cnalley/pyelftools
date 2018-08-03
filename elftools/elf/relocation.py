@@ -12,7 +12,7 @@ from ..common.exceptions import ELFRelocationError
 from ..common.utils import elf_assert, struct_parse
 from .sections import Section
 from .enums import (
-    ENUM_RELOC_TYPE_i386, ENUM_RELOC_TYPE_x64, ENUM_RELOC_TYPE_MIPS, ENUM_RELOC_TYPE_ARM)
+    ENUM_RELOC_TYPE_i386, ENUM_RELOC_TYPE_x64, ENUM_RELOC_TYPE_MIPS, ENUM_RELOC_TYPE_ARM, ENUM_RELOC_TYPE_PPC)
 
 
 class Relocation(object):
@@ -156,6 +156,11 @@ class RelocationHandler(object):
                 raise ELFRelocationError(
                     'Unexpected RELA relocation for ARM: %s' % reloc)
             recipe = self._RELOCATION_RECIPES_ARM.get(reloc_type, None)
+        elif self.elffile.get_machine_arch() == 'PPC':
+            #if reloc.is_RELA():
+            #    raise ELFRelocationError(
+            #        'Unexpected RELA relocation for PPC: %s' % reloc)
+            recipe = self._RELOCATION_RECIPES_PPC.get(reloc_type, None)
 
         if recipe is None:
             raise ELFRelocationError(
@@ -259,4 +264,11 @@ class RelocationHandler(object):
             bytesize=4, has_addend=True, calc_func=_reloc_calc_sym_plus_addend),
     }
 
+    _RELOCATION_RECIPES_PPC = {
+        ENUM_RELOC_TYPE_PPC['R_PPC_NONE']: _RELOCATION_RECIPE_TYPE(
+            bytesize=4, has_addend=False, calc_func=_reloc_calc_identity),
+        ENUM_RELOC_TYPE_PPC['R_PPC_ADDR32']: _RELOCATION_RECIPE_TYPE(
+            bytesize=4, has_addend=False,
+            calc_func=_reloc_calc_sym_plus_value),
+    }
 
